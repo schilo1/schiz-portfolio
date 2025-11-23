@@ -57,6 +57,7 @@ export default function DashboardPage() {
     try {
       setIsLoadingPortfolios(true);
       const response = await fetch("/api/portfolio");
+      console.log("Response status:", response);
       if (response.ok) {
         const data = await response.json();
         setPortfolios(data);

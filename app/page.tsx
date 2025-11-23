@@ -647,7 +647,7 @@ export default function PortfolioForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(portfolioData),
       });
-
+      console.log("Response status:", response.status);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Erreur création portfolio");
