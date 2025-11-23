@@ -12,7 +12,8 @@ import {
 // POST /api/users/[id]/upload/images - Uploader une image
 export async function POST(request: NextRequest) {
   const url = new URL(request.url);
-  const id: any = url.pathname.split("/").pop(); // Extracts the ID from the path
+  const match = url.pathname.match(/\/users\/([^\/]+)\/upload/);
+  const id: any = match ? match[1] : null;
   try {
     // ✅ AWAIT params first
 
@@ -83,7 +84,8 @@ export async function POST(request: NextRequest) {
 // GET /api/users/[id]/upload/images - Récupérer les images d'un utilisateur
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const id = url.pathname.split("/").pop(); // Extracts the ID from the path
+  const match = url.pathname.match(/\/users\/([^\/]+)\/upload/);
+  const id: any = match ? match[1] : null;
   try {
     // ✅ AWAIT params first
 

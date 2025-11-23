@@ -12,7 +12,8 @@ import {
 // POST /api/users/[id]/upload/videos - Uploader une vidéo
 export async function POST(request: NextRequest) {
   const url = new URL(request.url);
-  const id: any = url.pathname.split("/").pop(); // Extracts the ID from the path
+  const match = url.pathname.match(/\/users\/([^\/]+)\/upload/);
+  const id: any = match ? match[1] : null;
   try {
     // ✅ AWAIT params first
 
