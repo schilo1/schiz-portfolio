@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ====================================
+// USER PORTFOLIO COMPLET
+// ====================================
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  
+  // STEP 2: Personal Info
+  firstName String
+  lastName  String
+  email     String?  @unique
+  phone     String?
+  location  String?
+  
+  // STEP 3: Professional Details
+  profession String        // Can be standard profession or custom profession from "Autre"
+  title     String
+  bio       String?
+  skills    String[]
+  experience String       // "junior", "intermediate", "advanced", "expert"
+  
+  // Relations
+  experiences   ProfessionalExperience[]
+  projects      Project[]
+  socialLinks   SocialLinks?
+  motivations   Motivation?
+  designPreferences DesignPreferences?
+  images    Image[]
+  videos    Video[]
+  documents Document[]
+  
+  // Status
+  status    String    @default("pending") // "pending", "in-progress", "completed"
+  
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+
+  @@index([status])
+  @@index([profession])
+}
+
+// ====================================
+// STEP 4: Professional Experiences
+// ====================================
+model ProfessionalExperience {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  company   String
+  position  String
+  duration  String?
+  description String?
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ====================================
+// STEP 5: Projects
+// ====================================
+model Project {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name      String
+  description String
+  technologies String[]
+  link      String?
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ====================================
+// STEP 6: Social Networks
+// ====================================
+model SocialLinks {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  userId    String   @unique @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  linkedin  String?
+  github    String?
+  website   String?
+  twitter   String?
+  instagram String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ====================================
+// STEP 7 & 8: Motivations
+// ====================================
+model Motivation {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  userId    String   @unique @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  firstProject String?
+  motivation   String?
+  achievement  String?
+  inspiration  String?
+  learningStyle String?
+  futureGoals  String?
+  challenges   String?
+  uniqueValue  String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ====================================
+// STEP 1: Design Preferences - COMPLETE WITH ALL FIELDS
+// ====================================
+model DesignPreferences {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  userId    String   @unique @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // ===== COLOR PALETTE =====
+  paletteId String?  // "blue-purple", "ocean", "sunset", "forest", "midnight", "neon", "custom"
+  paletteName String?  // Human-readable palette name
+  
+  // Color Codes (Hex format #XXXXXX)
+  primaryColor String?
+  secondaryColor String?
+  accentColor String?
+  backgroundColor String?
+  textColor String?
+  
+  // ===== TYPOGRAPHY =====
+  typographyId String?  // "modern", "elegant", "tech", "playful", "custom"
+  typographyName String?  // Human-readable typography name
+  
+  // Font Properties
+  fontFamily String?
+  headingSize String?
+  headingWeight String?
+  bodySize String?
+  bodyWeight String?
+  letterSpacing String?  // e.g., "0.05em"
+  lineHeight String?     // e.g., "1.6"
+  
+  // Custom Typography (URL or embedded text)
+  customTypographyUrl String?     // Link to custom font/typography resource
+  customTypographyName String?    // Description of custom typography
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ====================================
+// STEP 9: Media - Images
+// ====================================
+model Image {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name      String
+  size      Int
+  url       String   // S3 URL
+  key       String   // S3 Key pour suppression
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ====================================
+// STEP 9: Media - Videos
+// ====================================
+model Video {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name      String
+  size      Int
+  url       String   // S3 URL
+  key       String   // S3 Key pour suppression
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ====================================
+// STEP 10: Documents
+// ====================================
+model Document {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name      String
+  size      Int
+  type      String   // MIME type
+  url       String   // S3 URL
+  key       String   // S3 Key pour suppression
+  isPaid    Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isPaid])
+}
