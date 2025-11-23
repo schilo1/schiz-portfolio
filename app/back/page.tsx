@@ -16,7 +16,6 @@ import {
   Award,
   Loader,
 } from "lucide-react";
-import toast from "react-hot-toast";
 
 interface Portfolio {
   id: string;
@@ -33,7 +32,17 @@ interface Portfolio {
   videos: any[];
   documents: any[];
 }
+interface PortfolioResponse {
+  success?: boolean;
+  data: any[];
+  count?: number;
+}
 
+interface ErrorResponse {
+  error: string;
+  details?: string;
+  code?: string;
+}
 export default function DashboardPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -57,40 +66,17 @@ export default function DashboardPage() {
   const fetchPortfolios = async () => {
     try {
       setIsLoadingPortfolios(true);
-
       const response = await fetch("/api/portfolio");
-      console.log("Response status:", response.status);
-
-      // Vérifiez d'abord si la réponse est OK
-      if (!response.ok) {
-        // Essayez de récupérer le message d'erreur du serveur
-        let errorMessage = `Erreur: ${response.status} ${response.statusText}`;
-
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
-          console.error("Could not parse error response:", parseError);
-        }
-
-        console.error("Failed to fetch portfolios:", errorMessage);
-        toast.error(`❌ ${errorMessage}`, { duration: 5000 });
-        return;
+      console.log("Response status:", response);
+      console.log("DATABASE_URL from env:", process.env.DATABASE_URL);
+      if (response.ok) {
+        const data = await response.json();
+        setPortfolios(data);
+      } else {
+        console.error("Failed to fetch portfolios");
       }
-
-      // Parsez les données si la réponse est OK
-      const data = await response.json();
-      setPortfolios(data);
-      console.log("Portfolios fetched successfully:", data);
     } catch (error) {
-      // Capturez les erreurs réseau ou parsing
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Erreur inconnue lors de la récupération";
-
-      console.error("Error fetching portfolios:", errorMessage);
-      toast.error(`❌ ${errorMessage}`, { duration: 5000 });
+      console.error("Error fetching portfolios:", error);
     } finally {
       setIsLoadingPortfolios(false);
     }
