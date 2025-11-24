@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import { uploadFilesToS3AndDB } from "@/lib/s3-upload";
 import {
   User,
   Briefcase,
@@ -136,6 +137,7 @@ const typographies = [
     fontWeights: { heading: 700, body: 400 },
   },
 ];
+
 interface ImageFile {
   id: number;
   name: string;
@@ -224,8 +226,14 @@ export default function PortfolioForm() {
     customTypographyName: "",
   });
 
-  const totalSteps = 10;
+  // ✅ MODIFIED: Changed from 10 to 9 steps
+  // OLD CODE: const totalSteps = 10;
+  const totalSteps = 9;
 
+  // ✅ MODIFIED: Updated steps array - removed "Médias" (step 9) and "Documents" (step 10), added "Fichiers" as step 9
+  // OLD STEPS ARRAY:
+  // { id: 9, title: "Médias", icon: ImageIcon },
+  // { id: 10, title: "Documents", icon: FileText },
   const steps = [
     { id: 1, title: "Design", icon: Palette },
     { id: 2, title: "Personnel", icon: User },
@@ -235,8 +243,8 @@ export default function PortfolioForm() {
     { id: 6, title: "Réseaux", icon: Globe },
     { id: 7, title: "Motivations", icon: Lightbulb },
     { id: 8, title: "Succès", icon: Star },
-    { id: 9, title: "Médias", icon: ImageIcon },
-    { id: 10, title: "Documents", icon: FileText },
+    // ✅ NEW STEP 9: "Fichiers" with WhatsApp/Telegram instead of separate Media/Documents steps
+    { id: 9, title: "Fichiers", icon: FileText },
   ];
 
   const professions = [
@@ -406,18 +414,21 @@ export default function PortfolioForm() {
     setSubmitError("");
 
     if (currentStep === 1) {
-      toast.success(`Étape 1/10 ✓ - Design configuré!`, {
+      toast.success(`Étape 1/9 ✓ - Design configuré!`, {
         icon: "🎨",
       });
+      // ✅ MODIFIED: Changed from "1/10" to "1/9"
+      // OLD: toast.success(`Étape 1/10 ✓ - Design configuré!`
     } else if (currentStep === 2) {
       if (!formData.firstName || !formData.lastName || !formData.email) {
         setSubmitError("Veuillez remplir tous les champs obligatoires");
         toast.error("❌ Veuillez remplir tous les champs obligatoires");
         return;
       }
-      toast.success(`Étape 2/10 ✓ - Infos personnelles sauvegardées!`, {
+      toast.success(`Étape 2/9 ✓ - Infos personnelles sauvegardées!`, {
         icon: "👤",
       });
+      // ✅ MODIFIED: Changed from "2/10" to "2/9"
     } else if (currentStep === 3) {
       const isValidProfession =
         formData.profession && formData.profession !== "Autre";
@@ -439,9 +450,10 @@ export default function PortfolioForm() {
         toast.error("❌ Veuillez remplir tous les champs obligatoires");
         return;
       }
-      toast.success(`Étape 3/10 ✓ - Détails professionnels sauvegardés!`, {
+      toast.success(`Étape 3/9 ✓ - Détails professionnels sauvegardés!`, {
         icon: "💼",
       });
+      // ✅ MODIFIED: Changed from "3/10" to "3/9"
     } else if (currentStep === 4) {
       if (
         !formData.professionalExperiences[0].company ||
@@ -451,18 +463,20 @@ export default function PortfolioForm() {
         toast.error("❌ Veuillez remplir au moins la première expérience");
         return;
       }
-      toast.success(`Étape 4/10 ✓ - Expériences sauvegardées!`, {
+      toast.success(`Étape 4/9 ✓ - Expériences sauvegardées!`, {
         icon: "🏆",
       });
+      // ✅ MODIFIED: Changed from "4/10" to "4/9"
     } else if (currentStep === 5) {
       if (!formData.projects[0].name || !formData.projects[0].description) {
         setSubmitError("Veuillez remplir au moins le premier projet");
         toast.error("❌ Veuillez remplir au moins le premier projet");
         return;
       }
-      toast.success(`Étape 5/10 ✓ - Projets sauvegardés!`, {
+      toast.success(`Étape 5/9 ✓ - Projets sauvegardés!`, {
         icon: "🚀",
       });
+      // ✅ MODIFIED: Changed from "5/10" to "5/9"
     } else if (currentStep === 6) {
       if (
         !formData.linkedin &&
@@ -475,32 +489,38 @@ export default function PortfolioForm() {
         toast.error("❌ Veuillez ajouter au moins un lien de réseau social");
         return;
       }
-      toast.success(`Étape 6/10 ✓ - Réseaux sociaux sauvegardés!`, {
+      toast.success(`Étape 6/9 ✓ - Réseaux sociaux sauvegardés!`, {
         icon: "🔗",
       });
+      // ✅ MODIFIED: Changed from "6/10" to "6/9"
     } else if (currentStep === 7) {
       if (!formData.firstProject) {
         setSubmitError("Veuillez répondre à la question");
         toast.error("❌ Veuillez répondre à la question");
         return;
       }
-      toast.success(`Étape 7/10 ✓ - Motivations sauvegardées!`, {
+      toast.success(`Étape 7/9 ✓ - Motivations sauvegardées!`, {
         icon: "💡",
       });
+      // ✅ MODIFIED: Changed from "7/10" to "7/9"
     } else if (currentStep === 8) {
       if (!formData.achievement) {
         setSubmitError("Veuillez répondre à la question");
         toast.error("❌ Veuillez répondre à la question");
         return;
       }
-      toast.success(`Étape 8/10 ✓ - Succès sauvegardés!`, {
+      toast.success(`Étape 8/9 ✓ - Succès sauvegardés!`, {
         icon: "⭐",
       });
-    } else if (currentStep === 9) {
-      toast.success(`Étape 9/10 ✓ - Médias configurés!`, {
-        icon: "📸",
-      });
+      // ✅ MODIFIED: Changed from "8/10" to "8/9"
     }
+    // ✅ REMOVED: Old condition for currentStep === 9 (Media upload step)
+    // OLD CODE:
+    // else if (currentStep === 9) {
+    //   toast.success(`Étape 9/10 ✓ - Médias configurés!`, {
+    //     icon: "📸",
+    //   });
+    // }
 
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
@@ -516,6 +536,46 @@ export default function PortfolioForm() {
     }
   };
 
+  // ✅ COMMENTED OUT: Old S3 presigned URL upload function (kept for reference)
+  // This function was designed to upload files directly to S3 bypassing Vercel
+  // Uncomment if you want to use S3 presigned URLs instead of WhatsApp/Telegram
+  // const uploadFiles = async (userId: string) => {
+  //   try {
+  //     // ✅ Collect all files with their types
+  //     const filesToUpload = [
+  //       ...formData.images.map((img: ImageFile) => ({
+  //         file: img.file,
+  //         fileType: "image" as const,
+  //       })),
+  //       ...formData.videos.map((vid: VideoFile) => ({
+  //         file: vid.file,
+  //         fileType: "video" as const,
+  //       })),
+  //       ...formData.documents.map((doc: DocumentFile) => ({
+  //         file: doc.file,
+  //         fileType: "document" as const,
+  //       })),
+  //     ];
+  //
+  //     if (filesToUpload.length === 0) {
+  //       return; // No files to upload
+  //     }
+  //
+  //     // ✅ Upload all files directly to S3 and save metadata
+  //     const uploadedCount = await uploadFilesToS3AndDB(filesToUpload, userId);
+  //
+  //     if (uploadedCount === 0) {
+  //       throw new Error("No files were uploaded successfully");
+  //     }
+  //   } catch (error) {
+  //     console.error("Erreur lors de l'upload des fichiers:", error);
+  //     throw error;
+  //   }
+  // };
+
+  // ✅ KEPT: Old form-based upload function (kept for backward compatibility if needed)
+  // This function uploads files via separate API routes for images, videos, and documents
+  // Currently NOT CALLED in the new flow (files are sent via WhatsApp/Telegram instead)
   const uploadFiles = async (userId: string) => {
     try {
       let uploadedCount = 0;
@@ -586,6 +646,9 @@ export default function PortfolioForm() {
     }
   };
 
+  // ✅ MODIFIED: handleSubmit function - removed uploadFiles call
+  // OLD CODE: await uploadFiles(userId); was here after portfolio creation
+  // NEW BEHAVIOR: Files are now sent via WhatsApp/Telegram in Step 9
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setSubmitError("");
@@ -656,19 +719,22 @@ export default function PortfolioForm() {
       const result = await response.json();
       const userId = result.user.id;
 
-      toast.loading("📤 Upload des fichiers en cours...");
-
-      await uploadFiles(userId);
+      // ✅ REMOVED: await uploadFiles(userId);
+      // OLD CODE: This was calling the file upload function
+      // NEW BEHAVIOR: Files are now managed via WhatsApp/Telegram in Step 9
 
       toast.dismiss();
-      toast.success("🎉Données reçu notre equipe créera votre porfolio!", {
-        duration: 5000,
-        icon: "✨",
-      });
+      toast.success(
+        "🎉 Données reçues! Rendez-vous à l'étape suivante pour envoyer vos fichiers.",
+        {
+          duration: 5000,
+          icon: "✨",
+        }
+      );
 
-      setTimeout(() => {
-        router.push("/");
-      }, 2000);
+      // ✅ MODIFIED: No redirect to home
+      // OLD CODE: setTimeout(() => { router.push("/"); }, 2000);
+      // NEW BEHAVIOR: Stay on the form and proceed to Step 9 (WhatsApp/Telegram)
     } catch (error) {
       console.error("Erreur:", error);
       toast.dismiss(loadingToast);
@@ -941,7 +1007,7 @@ export default function PortfolioForm() {
                   📌 Information Importante
                 </p>
                 <p className="text-xs leading-relaxed">
-                  Pour toute information complémentaire ajouté dans la section
+                  Pour toute information complémentaire ajoutée dans la section
                   documents, des frais additionnels seront appliqués.
                 </p>
               </div>
@@ -2148,14 +2214,14 @@ export default function PortfolioForm() {
                 <div>
                   <label className="block text-[#1F2937] text-xs sm:text-sm font-bold mb-2 uppercase tracking-wide flex items-center gap-2">
                     <Globe className="w-4 h-4" />
-                    Site Web / Portfolio
+                    Autre lien: Tik tok ou indeed
                   </label>
                   <input
                     type="url"
                     name="website"
                     value={formData.website}
                     onChange={handleInputChange}
-                    placeholder="https://votresite.com"
+                    placeholder="https://tiktok.com"
                     className="w-full px-3 sm:px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#3B82F6] focus:bg-white transition-all text-base"
                   />
                 </div>
@@ -2240,7 +2306,9 @@ export default function PortfolioForm() {
               </div>
             )}
 
-            {/* STEP 9: Media */}
+            {/* ✅ NEW STEP 9: WhatsApp/Telegram File Sharing (Replaces old steps 9 & 10) */}
+            {/* ✅ REMOVED: Old STEP 9 (Media Upload) and STEP 10 (Documents) sections */}
+            {/* OLD STEP 9 CODE:
             {currentStep === 9 && (
               <div className="space-y-4 md:space-y-6 animate-fade-in">
                 <div>
@@ -2253,123 +2321,11 @@ export default function PortfolioForm() {
                     sont facultatifs)
                   </p>
                 </div>
-
-                <div className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-gray-200 rounded-xl">
-                  <h4 className="text-[#1F2937] font-bold text-sm md:text-base mb-4 flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 md:w-5 md:h-5" />
-                    Images ({formData.images.length}/10)
-                  </h4>
-
-                  <label className="block mb-4">
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={formData.images.length >= 10}
-                      className="hidden"
-                    />
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#3B82F6] hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                      <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm font-semibold text-gray-700">
-                        Cliquez pour ajouter des images
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Maximum 10 images (JPG, PNG, WebP)
-                      </p>
-                    </div>
-                  </label>
-
-                  {formData.images.length > 0 && (
-                    <div className="space-y-2">
-                      {formData.images.map((image: any) => (
-                        <div
-                          key={image.id}
-                          className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200"
-                        >
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <ImageIcon className="w-4 h-4 text-[#3B82F6] flex-shrink-0" />
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-700 truncate">
-                                {image.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {(image.size / 1024).toFixed(2)} KB
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeImage(image.id)}
-                            className="ml-2 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-gray-200 rounded-xl">
-                  <h4 className="text-[#1F2937] font-bold text-sm md:text-base mb-4 flex items-center gap-2">
-                    <Video className="w-4 h-4 md:w-5 md:h-5" />
-                    Vidéo ({formData.videos.length}/1)
-                  </h4>
-
-                  <label className="block mb-4">
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleVideoUpload}
-                      disabled={formData.videos.length >= 1}
-                      className="hidden"
-                    />
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#8B5CF6] hover:bg-purple-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                      <Video className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm font-semibold text-gray-700">
-                        Cliquez pour ajouter une vidéo
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Maximum 1 vidéo (MP4, WebM, AVI)
-                      </p>
-                    </div>
-                  </label>
-
-                  {formData.videos.length > 0 && (
-                    <div className="space-y-2">
-                      {formData.videos.map((video: any) => (
-                        <div
-                          key={video.id}
-                          className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200"
-                        >
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <Video className="w-4 h-4 text-[#8B5CF6] flex-shrink-0" />
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-700 truncate">
-                                {video.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {(video.size / 1024 / 1024).toFixed(2)} MB
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeVideo(video.id)}
-                            className="ml-2 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                [... old media upload UI ...]
               </div>
             )}
-
-            {/* STEP 10: Documents */}
+            
+            OLD STEP 10 CODE:
             {currentStep === 10 && (
               <div className="space-y-4 md:space-y-6 animate-fade-in">
                 <div>
@@ -2382,84 +2338,149 @@ export default function PortfolioForm() {
                     (tous les champs sont facultatifs)
                   </p>
                 </div>
+                [... old document upload UI with billing warnings ...]
+              </div>
+            )}
+            */}
 
-                <div className="p-4 sm:p-6 bg-gradient-to-br from-[#FEE2E2] to-[#FEE2E2] border-2 border-[#DC2626] rounded-xl">
-                  <div className="flex gap-3">
-                    <DollarSign className="w-5 h-5 md:w-6 md:h-6 text-[#DC2626] flex-shrink-0 mt-0.5" />
+            {/* ✅ NEW STEP 9: WhatsApp/Telegram File Sharing Interface */}
+            {currentStep === 9 && (
+              <div className="space-y-4 md:space-y-6 animate-fade-in">
+                {/* Header Section */}
+                <div className="text-center space-y-4">
+                  <h3 className="text-[#1F2937] font-bold text-lg md:text-2xl flex items-center justify-center gap-2 md:gap-3">
+                    <FileText className="w-5 h-5 md:w-6 md:h-6 text-[#3B82F6]" />
+                    Envoyer vos Fichiers
+                  </h3>
+                  <p className="text-gray-600 text-xs sm:text-sm">
+                    Vos données ont été enregistrées avec succès! ✅
+                  </p>
+                </div>
+
+                {/* Success Message */}
+                <div className="p-4 sm:p-6 bg-gradient-to-br from-[#E0F2FE] to-[#F0F9FF] border-2 border-[#0EA5E9] rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 md:w-6 md:h-6 text-[#10B981] flex-shrink-0 mt-0.5" />
                     <div>
                       <h4 className="text-[#1F2937] font-bold text-sm md:text-base mb-2">
-                        ⚠️ Attention à la Facturation
+                        ✨ Prochaine Étape
                       </h4>
                       <p className="text-[#1F2937] text-xs sm:text-sm font-medium">
-                        Tous les documents additionnels, vidéos additionnelles,
-                        ou ajouts au-delà du forfait initial (10 images + 1
-                        vidéo) seront <strong>facturés séparément</strong>.
-                      </p>
-                      <p className="text-[#DC2626] text-xs sm:text-sm font-semibold mt-2">
-                        Contactez-nous pour connaître les tarifs additionnels.
+                        Envoyez vos fichiers (images, vidéos, documents) via
+                        WhatsApp en HD ou Telegram pour accélérer la création de
+                        votre portfolio.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 sm:p-6 bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-gray-200 rounded-xl">
-                  <h4 className="text-[#1F2937] font-bold text-sm md:text-base mb-4 flex items-center gap-2">
-                    <FileText className="w-4 h-4 md:w-5 md:h-5" />
-                    Documents ({formData.documents.length})
+                {/* Files List */}
+                <div className="space-y-3">
+                  <p className="text-[#1F2937] text-sm font-bold text-center">
+                    📁 Fichiers à envoyer:
+                  </p>
+                  <ul className="text-[#1F2937] text-xs sm:text-sm space-y-2 ml-4">
+                    <li>✓ 5 images pour votre portfolio (optionnel)</li>
+                    <li>✓ 1 vidéo de présentation (optionnel)</li>
+                    <li>
+                      ✓ Documents personnels CV et MAX 2 Certificats tous
+                      fichiers supplementaires sera facturées (optionnel)
+                    </li>
+                  </ul>
+                </div>
+
+                {/* WhatsApp & Telegram Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {/* WhatsApp Button */}
+                  <a
+                    href="https://wa.me/+2250702719478?text=Bonjour%20SCHIZ%20TECH%2C%20j'ai%20complété%20mon%20formulaire%20de%20portfolio%20et%20je%20voudrais%20envoyer%20mes%20fichiers%20(images%2C%20vidéos%2C%20documents)%20pour%20l'accélération%20de%20la%20création.%20Prêt%20à%20envoyer!"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-4 sm:p-6 bg-gradient-to-br from-[#25D366] to-[#1BA952] rounded-xl hover:shadow-lg hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-3 group cursor-pointer"
+                  >
+                    <div>
+                      <svg
+                        className="w-6 h-6 sm:w-8 sm:h-8 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.272-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-5.031 1.378c-3.055 2.116-4.922 5.88-4.922 9.52C2.062 19.395 3.261 21 5.330 21h4.914c2.069 0 3.268-1.605 3.268-3.66V9.62c0-2.054-1.199-3.22-3.268-3.22" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-white font-bold text-sm sm:text-base">
+                        WhatsApp
+                      </p>
+                      <p className="text-white text-xs sm:text-sm opacity-90">
+                        Envoyer vos fichiers
+                      </p>
+                    </div>
+                  </a>
+
+                  {/* Telegram Button */}
+                  <a
+                    href="https://t.me/schiz_tech"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-4 sm:p-6 bg-gradient-to-br from-[#0088cc] to-[#0066a1] rounded-xl hover:shadow-lg hover:scale-105 transition-all active:scale-95 flex items-center justify-center gap-3 group cursor-pointer"
+                  >
+                    <div>
+                      <svg
+                        className="w-6 h-6 sm:w-8 sm:h-8 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295-.042 0-.085-.004-.127-.015l.214-3.037 5.52-4.99c.24-.213-.052-.328-.373-.115L6.765 13.05l-2.995-.936c-.651-.203-.666-.651.138-.968l11.707-4.514c.54-.23 1.01.133.832 1.04z" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-white font-bold text-sm sm:text-base">
+                        Telegram
+                      </p>
+                      <p className="text-white text-xs sm:text-sm opacity-90">
+                        Envoyer vos fichiers
+                      </p>
+                    </div>
+                  </a>
+                </div>
+
+                {/* Important Notice */}
+                <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-br from-[#FEF3C7] to-[#FEF9E7] border-2 border-[#FBBF24] rounded-xl">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-[#D97706] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[#1F2937] text-xs sm:text-sm font-medium">
+                        <strong>📝 Important:</strong> Envoyez vos fichiers dans
+                        les 24h pour une création rapide de votre portfolio.
+                        Sans fichiers, votre portfolio sera créé avec les
+                        informations textuelles uniquement.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* File Tips */}
+                <div className="p-4 sm:p-6 bg-white border-2 border-gray-200 rounded-xl">
+                  <h4 className="text-[#1F2937] font-bold text-sm md:text-base mb-3 flex items-center gap-2">
+                    <Target className="w-4 h-4 md:w-5 md:h-5 text-[#3B82F6]" />
+                    Conseils pour les fichiers
                   </h4>
-
-                  <label className="block mb-4">
-                    <input
-                      type="file"
-                      multiple
-                      accept=".doc,.docx,.pdf,.mp4,.webm,.avi,.mov"
-                      onChange={handleDocumentUpload}
-                      className="hidden"
-                    />
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#06B6D4] hover:bg-cyan-50 transition-all">
-                      <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm font-semibold text-gray-700">
-                        Cliquez pour ajouter des documents
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Word, PDF, ou vidéos supplémentaires (frais applicables)
-                      </p>
-                    </div>
-                  </label>
-
-                  {formData.documents.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-[#DC2626] mb-3">
-                        ⚠️ Les documents ci-dessous seront facturés
-                      </p>
-                      {formData.documents.map((doc: any) => (
-                        <div
-                          key={doc.id}
-                          className="flex items-center justify-between bg-white p-3 rounded-lg border border-[#DC2626] border-opacity-30"
-                        >
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <FileText className="w-4 h-4 text-[#06B6D4] flex-shrink-0" />
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-700 truncate">
-                                {doc.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {(doc.size / 1024 / 1024).toFixed(2)} MB -{" "}
-                                {doc.type || "Unknown type"}
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeDocument(doc.id)}
-                            className="ml-2 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <ul className="text-[#1F2937] text-xs sm:text-sm space-y-2">
+                    <li>
+                      ✓ <strong>Images:</strong> Haute qualité (1920x1080
+                      minimum), format JPG/PNG
+                    </li>
+                    <li>
+                      ✓ <strong>Vidéo:</strong> Durée 30-60 secondes, format MP4
+                    </li>
+                    <li>
+                      ✓ <strong>Documents:</strong> PDF, Word, ou images
+                      numérisées
+                    </li>
+                    <li>
+                      ✓ <strong>Max:</strong> 5 images + 1 vidéo + documents
+                    </li>
+                  </ul>
                 </div>
               </div>
             )}
@@ -2496,9 +2517,11 @@ export default function PortfolioForm() {
                   </>
                 ) : currentStep === totalSteps ? (
                   <>
-                    <span className="hidden sm:inline">Créer Portfolio</span>
-                    <span className="sm:hidden">Créer</span>
-                    <Zap size={18} />
+                    <span className="hidden sm:inline">
+                      Valider & Continuer
+                    </span>
+                    <span className="sm:hidden">Valider</span>
+                    <Check size={18} />
                   </>
                 ) : (
                   <>
