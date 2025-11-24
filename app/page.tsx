@@ -830,7 +830,7 @@ export default function PortfolioForm() {
 
                 <div className="bg-gradient-to-br from-[#FEF3C7] to-[#FCD34D] rounded-xl p-4 border-2 border-[#F59E0B]">
                   <p className="text-[#1F2937] font-bold text-base">
-                    Ce lien est réservé à ceux qui ont payé{" "}
+                    Ce lien est réservé aux clients Schiz Tech{" "}
                   </p>
                 </div>
 
@@ -839,6 +839,10 @@ export default function PortfolioForm() {
                   <p>✓ Personnalisation avancée</p>
                   <p className="text-[#DC2626] font-semibold">
                     ⚠️ Informations supplémentaires = Frais additionnels
+                  </p>
+                  <p className="text-[#DC2626] font-semibold">
+                    ⚠️ En remplissant ce formulaire, vous acceptez les
+                    conditions d&apos;utilisation
                   </p>
                 </div>
               </div>
